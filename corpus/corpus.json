@@ -1,0 +1,13 @@
+[
+    {
+        "inputFile": "lakossagi-aszf-0-torzsresz-20260701-uj.pdf",
+        "skipPages": [1, 2, 3, 4],
+        "footerLinesPatterns": [
+            "^\\d+/\\d+$",
+            "^Utolsó módosítás:",
+            "^Hatálya:",
+            "^File neve:"
+        ],
+        "chunkSize": 1024
+    }
+]

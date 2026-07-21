@@ -52,7 +52,7 @@ def parse(
             if page_number in skip_page_numbers:
                 continue
             page_texts.append(_extract_page(page, compiled_footer_patterns))
-    return "".join(page_texts)
+    return " ".join(page_texts)
 
 
 def _is_footer_line(text: str, footer_patterns: list[re.Pattern[str]]) -> bool:
@@ -62,24 +62,16 @@ def _is_footer_line(text: str, footer_patterns: list[re.Pattern[str]]) -> bool:
 
 def _extract_page(page: Page, footer_patterns: list[re.Pattern[str]]) -> str:
     """Extract one page's content as prose text + serialized table text,
-    interleaved in their original top-to-bottom reading order (rather than
-    dumping all prose first and all tables after)."""
+    interleaved in their original top-to-bottom reading order."""
     tables = page.find_tables()
 
-    # Crop out every detected table's bounding box, then read what's left
-    # as plain prose text, line by line, each tagged with its vertical
-    # ("top") position so it can be merged back with the tables in order.
     prose_page = page
     for table in tables:
         prose_page = prose_page.outside_bbox(table.bbox)
     prose_lines = prose_page.extract_text_lines()
 
-    # segments: list of (top_position, is_table, text) so everything can be
-    # sorted by vertical position to reconstruct the original reading
-    # order. Footer boilerplate lines are dropped here since they add no
-    # value to the RAG content.
-    segments: list[tuple[float, bool, str]] = [
-        (line["top"], False, line["text"])
+    segments: list[tuple[float, str]] = [
+        (line["top"], line["text"])
         for line in prose_lines
         if not _is_footer_line(line["text"], footer_patterns)
     ]
@@ -87,19 +79,11 @@ def _extract_page(page: Page, footer_patterns: list[re.Pattern[str]]) -> str:
     for table in tables:
         serialized = _serialize_table(table.extract())
         if serialized:
-            segments.append((table.bbox[1], True, serialized))
+            segments.append((table.bbox[1], serialized))
 
     segments.sort(key=lambda segment: segment[0])
 
-    # Join consecutive prose lines with a single newline (normal paragraph
-    # flow), but surround table blocks with blank lines so they stand out
-    # visually and don't get glued onto adjacent prose lines.
-    output_parts: list[str] = []
-    for _, is_table, text in segments:
-        if is_table:
-            output_parts.append(f"\n{text}\n")
-        else:
-            output_parts.append(text)
+    output_parts: list[str] = [text for _, text in segments]
     return "\n".join(output_parts)
 
 

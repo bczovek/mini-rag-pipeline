@@ -1,77 +1,94 @@
 """CLI entry point for the mini-RAG PDF ingestion pipeline.
 
-Reads a JSON config file describing which PDF documents to ingest and how
-to parse each one, then runs the PDF parser (see ``mini_rag.pdf_parser``)
-against every listed file.
+Reads a JSON corpus manifest describing which PDF documents to ingest and
+how to parse each one, then runs the PDF parser (see ``mini_rag.pdf_parser``)
+against every listed file and splits its text into chunks (see
+``mini_rag.text_splitter``). The manifest and the PDF files it references
+are expected to live side by side in the same corpus directory, so the
+whole directory can be moved or installed anywhere.
 
 Usage:
-    python -m mini_rag.main path/to/config.json
+    python -m mini_rag.main path/to/corpus.json
 """
 
 import argparse
 import json
 import sys
 from pathlib import Path
+from typing import Final
 
 from mini_rag.pdf_parser import parse
+from mini_rag.text_splitter import SectionAwareTextSplitter
+
+DEFAULT_CHUNK_SIZE: Final[int] = 1000
 
 
-def _resolve_input_file(input_file: str, config_path: Path) -> Path:
-    """Resolve an ``inputFile`` entry from the config file.
+def _resolve_input_file(input_file: str, corpus_path: Path) -> Path:
+    """Resolve an ``inputFile`` entry from the corpus manifest.
 
-    Relative paths are resolved against the config file's own directory,
-    so the config can be run from any working directory.
+    Relative paths are resolved against the manifest's own directory, since
+    the manifest and the PDF files it references are siblings in the same
+    corpus directory.
     """
     path = Path(input_file)
     if path.is_absolute():
         return path
-    return (config_path.parent / path).resolve()
+    return (corpus_path.parent / path).resolve()
 
 
-def run(config_path: Path) -> dict[str, str]:
-    """Parse every PDF file listed in the config file.
+def run(corpus_path: Path) -> dict[str, list[str]]:
+    """Parse and chunk every PDF file listed in the corpus manifest.
 
-    Returns a mapping of each entry's ``inputFile`` value to its fully
-    parsed text.
+    Returns a mapping of each entry's ``inputFile`` value to its list of
+    text chunks.
     """
-    entries = json.loads(config_path.read_text(encoding="utf-8"))
+    entries = json.loads(corpus_path.read_text(encoding="utf-8"))
 
-    parsed_documents: dict[str, str] = {}
+    chunked_documents: dict[str, list[str]] = {}
     for entry in entries:
         input_file = entry.get("inputFile", "")
         if not input_file:
             continue
 
-        file_path = _resolve_input_file(input_file, config_path)
-        parsed_documents[input_file] = parse(
+        file_path = _resolve_input_file(input_file, corpus_path)
+        text = parse(
             file_path,
             footer_line_patterns=entry.get("footerLinesPatterns"),
             skip_pages=entry.get("skipPages"),
         )
 
-    return parsed_documents
+        splitter = SectionAwareTextSplitter(
+            chunk_size=entry.get("chunkSize", DEFAULT_CHUNK_SIZE)
+        )
+        chunked_documents[input_file] = splitter.split(text)
+
+    return chunked_documents
 
 
 def main() -> None:
     arg_parser = argparse.ArgumentParser(
-        description="Parse PDF documents listed in a mini-RAG config file.",
+        description="Parse PDF documents listed in a mini-RAG corpus manifest.",
     )
-    arg_parser.add_argument("config", type=Path, help="Path to the JSON config file.")
+    arg_parser.add_argument(
+        "corpus", type=Path, help="Path to the corpus JSON manifest (e.g. corpus.json)."
+    )
     args = arg_parser.parse_args()
 
-    config_path: Path = args.config
-    if not config_path.exists():
-        print(f"Config file not found: {config_path}", file=sys.stderr)
+    corpus_path: Path = args.corpus
+    if not corpus_path.exists():
+        print(f"Corpus manifest not found: {corpus_path}", file=sys.stderr)
         sys.exit(1)
 
-    parsed_documents = run(config_path)
+    chunked_documents = run(corpus_path)
 
-    for input_file, text in parsed_documents.items():
+    for input_file, chunks in chunked_documents.items():
         print("=" * 100)
-        print(f"FILE: {input_file}")
+        print(f"FILE: {input_file} ({len(chunks)} chunks)")
         print("=" * 100)
-        print(text)
-        print()
+        for chunk_number, chunk_text in enumerate(chunks, start=1):
+            print(f"--- chunk {chunk_number} ---")
+            print(chunk_text)
+            print()
 
 
 if __name__ == "__main__":
