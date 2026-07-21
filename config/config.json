@@ -1,0 +1,20 @@
+[
+    {
+        "inputFile": "",
+        "skipPages": [1, 2],
+        "footerLinesPatterns": [
+            "",
+            ""
+        ],
+        "chunkSize": 500
+    },
+    {
+        "inputFile": "",
+        "skipPages": [1, 2],
+        "footerLinesPatterns": [
+            "",
+            ""
+        ],
+        "chunkSize": 500
+    }
+]
