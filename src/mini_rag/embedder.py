@@ -7,7 +7,7 @@ LangChain vector store for similarity search.
 """
 
 import logging
-from typing import Final
+from typing import Any, Final
 
 from langchain_core.documents import Document
 from langchain_core.vectorstores import InMemoryVectorStore
@@ -30,6 +30,17 @@ class E5Embeddings(HuggingFaceEmbeddings):
     respectively so the model can distinguish the two roles. This subclass
     adds those prefixes transparently before delegating to the base class.
     """
+
+    def __init__(self, *, model_name: str, **kwargs: Any) -> None:  # noqa: ANN401
+        """Initialize with an explicit, statically-checkable ``model_name``.
+
+        ``HuggingFaceEmbeddings.__init__`` only declares ``**kwargs: Any``, so
+        type checkers can't verify keyword arguments passed through it. This
+        override re-declares ``model_name`` explicitly so constructing
+        ``E5Embeddings(model_name=...)`` type-checks correctly; every other
+        keyword argument (e.g. ``encode_kwargs``) is forwarded unchanged.
+        """
+        super().__init__(model_name=model_name, **kwargs)
 
     def embed_query(self, text: str) -> list[float]:
         """Embed a search query, applying the required ``"query: "`` prefix."""
@@ -65,6 +76,7 @@ class ChunkVectorStore:
     def __init__(self, embeddings: HuggingFaceEmbeddings | None = None) -> None:
         self._embeddings: HuggingFaceEmbeddings = embeddings or build_embeddings()
         self._vector_store: InMemoryVectorStore = InMemoryVectorStore(self._embeddings)
+        self._chunk_count: int = 0
 
     def add_chunks(self, source_file: str, chunks: list[str]) -> None:
         """Embed and store the chunks belonging to one source file."""
@@ -74,6 +86,7 @@ class ChunkVectorStore:
             for chunk in chunks
         ]
         self._vector_store.add_documents(documents)
+        self._chunk_count += len(documents)
         _logger.info("Embedded document: %s", source_file)
 
     def add_documents(self, chunked_documents: dict[str, list[str]]) -> None:
@@ -83,9 +96,9 @@ class ChunkVectorStore:
 
     def __len__(self) -> int:
         """Return the number of chunks currently held in the store."""
-        return len(self._vector_store.store)
+        return self._chunk_count
 
-    def search(self, query: str, k: int = 4) -> list[tuple[Document, float]]:
+    def search(self, query: str, k: int) -> list[tuple[Document, float]]:
         """Return the ``k`` chunks most similar to the query.
 
         Each result is paired with its cosine similarity score to the

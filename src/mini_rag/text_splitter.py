@@ -5,12 +5,12 @@ passes:
 
   1. A ``RecursiveCharacterTextSplitter`` configured with only the numbered
      section-heading separators (every depth: "1. ", "1.1. ", "1.1.1. ",
-     "1.1.1.1. ") and no fallback separators, forced to never merge
-     adjacent sections and never recurse further by using a chunk_size of
-     1: any piece it produces is, by definition, "too big" for that size,
-     so each becomes its own unit with no merging and (since there are no
-     further separators to fall back to) no further splitting either. This
-     gives a pure, size-unaware hard split on section boundaries alone.
+     "1.1.1.1. ") and no fallback separators, using a small ``chunk_size``
+     (``_MIN_SECTION_TOKENS``) so short sections (a bare heading, a
+     one-sentence section) are merged with their following same-level
+     sibling(s) up to that size instead of becoming their own tiny, mostly
+     uninformative chunk, while sections already at or above that size are
+     left as their own unit.
   2. Only the resulting section units that are still larger than the real
      ``chunk_size`` are handed to a ``CharacterTextSplitter`` -- a single
      flat pass with one separator and no recursion tiers -- so
@@ -19,11 +19,12 @@ passes:
      recursion step starts a fresh buffer and drops overlap across that
      boundary.
 
-``chunk_size`` is measured in tokens of the embedding model's own tokenizer
-(see :mod:`mini_rag.embedder`) rather than characters, since the E5 models
-used for embedding truncate their input at a fixed token budget (512
-tokens): sizing chunks in characters could silently let long or
-token-dense text pass that limit and get truncated before embedding.
+``chunk_size`` (and ``_MIN_SECTION_TOKENS``) are measured in tokens of the
+embedding model's own tokenizer (see :mod:`mini_rag.embedder`) rather than
+characters, since the E5 models used for embedding truncate their input at a
+fixed token budget (512 tokens): sizing chunks in characters could silently
+let long or token-dense text pass that limit and get truncated before
+embedding.
 """
 
 from collections.abc import Callable
@@ -39,6 +40,14 @@ from mini_rag.embedder import DEFAULT_MODEL_NAME
 
 _CHUNK_OVERLAP_RATIO: Final[float] = 0.2
 _BODY_SEPARATOR: Final[str] = " "
+
+# Sections at or below this many tokens (e.g. a bare heading like "1.9.
+# Szerkesztési célra fenntartva.") are merged with following same-level
+# sibling sections instead of staying their own near-empty chunk. Chosen
+# from the corpus's own token-length distribution: comfortably above the
+# ~50-token "title or one short sentence" band, well below the ~170-token
+# median section, so only genuinely tiny sections get merged.
+_MIN_SECTION_TOKENS: Final[int] = 96
 
 _SECTION_HEADING_PATTERNS: Final[list[str]] = [
     r"\n(?=\d+\.\s[A-ZÁÉÍÓÖŐÚÜŰ0-9])",
@@ -78,8 +87,9 @@ class SectionAwareTextSplitter:
                 separators=_SECTION_HEADING_PATTERNS,
                 is_separator_regex=True,
                 keep_separator="start",
-                chunk_size=1,
+                chunk_size=_MIN_SECTION_TOKENS,
                 chunk_overlap=0,
+                length_function=self._length_function,
             )
         )
         self._body_splitter: CharacterTextSplitter = CharacterTextSplitter(
