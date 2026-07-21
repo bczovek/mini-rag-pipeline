@@ -1,24 +1,3 @@
-"""CLI entry point for the mini-RAG PDF ingestion pipeline.
-
-Reads a JSON corpus manifest describing which PDF documents to ingest and
-how to parse each one, then runs the PDF parser (see ``mini_rag.pdf_parser``)
-against every listed file and splits its text into chunks (see
-``mini_rag.text_splitter``). The manifest has common ``footerLinesPatterns``
-and ``chunkSize`` settings shared by every document, plus a ``documents``
-array listing each document's ``inputFile`` and ``skipPages``. The manifest
-and the PDF files it references are expected to live side by side in the
-same corpus directory, so the whole directory can be moved or installed
-anywhere. The chunks are then embedded locally and held in an in-memory
-vector store (see ``mini_rag.embedder``). Once every document has been
-embedded, an interactive prompt reads queries from stdin, printing the most
-similar chunks for each one until the user types "exit".
-
-Usage:
-    python -m mini_rag.main path/to/corpus.json
-    python -m mini_rag.main path/to/corpus.json --top-k 8
-    python -m mini_rag.main path/to/corpus.json --min-similarity 0.5
-"""
-
 import argparse
 import json
 import logging
@@ -37,12 +16,6 @@ _logger: logging.Logger = logging.getLogger(__name__)
 
 
 def _resolve_input_file(input_file: str, corpus_path: Path) -> Path:
-    """Resolve an ``inputFile`` entry from the corpus manifest.
-
-    Relative paths are resolved against the manifest's own directory, since
-    the manifest and the PDF files it references are siblings in the same
-    corpus directory.
-    """
     path = Path(input_file)
     if path.is_absolute():
         return path
@@ -50,11 +23,6 @@ def _resolve_input_file(input_file: str, corpus_path: Path) -> Path:
 
 
 def run(corpus_path: Path) -> dict[str, list[str]]:
-    """Parse and chunk every PDF file listed in the corpus manifest.
-
-    Returns a mapping of each document's ``inputFile`` value to its list of
-    text chunks.
-    """
     manifest = json.loads(corpus_path.read_text(encoding="utf-8"))
     footer_line_patterns = manifest.get("footerLinesPatterns")
     splitter = SectionAwareTextSplitter(
@@ -105,8 +73,6 @@ def _print_search_results(
 def _run_query_loop(
     chunk_store: ChunkVectorStore, top_k: int, min_similarity: float | None
 ) -> None:
-    """Read queries from stdin and print search results until the user
-    types "exit" (or stdin is closed)."""
     while True:
         try:
             print("Enter a question to search the corpus, or type 'exit' to quit.")

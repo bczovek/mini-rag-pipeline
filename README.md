@@ -1,5 +1,8 @@
 # Mini RAG pipeline
 
+> Ez a felhasználói dokumentáció. Az implementáció belső felépítéséért és
+> tervezési döntésekért lásd a [DEVELOPERS.md](DEVELOPERS.md) fájlt.
+
 ## Követelmények
 
 - Python 3.11 vagy újabb
@@ -52,7 +55,7 @@ A kilépéshez írd be, hogy `exit` (vagy nyomj `Ctrl+D`-t).
 |---|---|---|---|
 | `corpus` (pozicionális) | igen | – | A korpusz manifest JSON fájl elérési útja (pl. `corpus/corpus.json`). |
 | `--top-k` | nem | `4` | Hány, a kérdéshez legközelebbi (legnagyobb cosine similarity) chunkot jelenítsen meg találatonként. Figyelmen kívül marad, ha `--min-similarity` meg van adva. |
-| `--min-similarity` | nem | – | Ha meg van adva, a `--top-k` helyett minden olyan chunkot visszaad, amelynek a kérdéshez viszonyított cosine similarity-je legalább ennyi (egy 0 és 1 közötti szám), a leghasonlóbbtól kezdve.
+| `--min-similarity` | nem | – | Ha meg van adva, a `--top-k` helyett minden olyan chunkot visszaad, amelynek a kérdéshez viszonyított cosine similarity-je legalább ennyi (egy -1 és 1 közötti szám), a leghasonlóbbtól kezdve.
 
 Példák:
 
@@ -73,3 +76,10 @@ Példák:
   adatok elvesznek, a következő futtatáskor a `corpus.json`-ban felsorolt
   dokumentumok újra feldolgozásra és beágyazásra kerülnek.
 - A beágyazás ~6 percet vesz igénybe.
+
+## További dokumentáció
+
+Az implementáció belső felépítéséért (modulok, tervezési döntések,
+trade-off-ok, architektúra diagram) lásd a [DEVELOPERS.md](DEVELOPERS.md)
+fejlesztői dokumentációt.
+
