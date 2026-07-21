@@ -18,11 +18,14 @@ and prose handled separately so table structure survives extraction:
     entirely.
 """
 
+import logging
 import re
 from pathlib import Path
 
 import pdfplumber
 from pdfplumber.page import Page
+
+_logger: logging.Logger = logging.getLogger(__name__)
 
 
 def parse(
@@ -46,13 +49,22 @@ def parse(
     ]
     skip_page_numbers = set(skip_pages or [])
 
+    _logger.info("Parsing document: %s", file_path)
     page_texts = []
     with pdfplumber.open(str(file_path)) as pdf:
+        page_count = len(pdf.pages)
         for page_number, page in enumerate(pdf.pages, start=1):
             if page_number in skip_page_numbers:
                 continue
             page_texts.append(_extract_page(page, compiled_footer_patterns))
-    return " ".join(page_texts)
+    text = "\n".join(page_texts)
+    _logger.info(
+        "Parsed document: %s (%d pages, %d characters)",
+        file_path,
+        page_count,
+        len(text),
+    )
+    return text
 
 
 def _is_footer_line(text: str, footer_patterns: list[re.Pattern[str]]) -> bool:
