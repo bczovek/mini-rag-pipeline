@@ -11,9 +11,6 @@ dependencies = [
     "transformers>=4",
 ]
 
-[project.scripts]
-mini-rag-ingest = "mini_rag.main:main"
-
 [build-system]
 requires = ["setuptools>=68"]
 build-backend = "setuptools.build_meta"
