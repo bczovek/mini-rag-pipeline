@@ -1,123 +1,91 @@
-[
-    {
-        "inputFile": "lakossagi-aszf-0-torzsresz-20260701-uj.pdf",
-        "skipPages": [1, 2, 3, 4],
-        "footerLinesPatterns": [
-            "^\\d+/\\d+$",
-            "^Utolsó módosítás:",
-            "^Hatálya:",
-            "^File neve:"
-        ],
-        "chunkSize": 1024
-    },
-    {
-        "inputFile": "lakossagi-aszf-3a-melleklet-dijak-mobil-Domino-ertekesitheto-20260701-uj.pdf",
-        "skipPages": [1, 2],
-        "footerLinesPatterns": [
-            "^\\d+/\\d+$",
-            "^Utolsó módosítás:",
-            "^Hatálya:",
-            "^File neve:"
-        ],
-        "chunkSize": 1024
-    },
-    {
-        "inputFile": "lakossagi-aszf-3a-melleklet-dijak-mobil-Domino-lezart-20251101-uj.pdf",
-        "skipPages": [1, 2],
-        "footerLinesPatterns": [
-            "^\\d+/\\d+$",
-            "^Utolsó módosítás:",
-            "^Hatálya:",
-            "^File neve:"
-        ],
-        "chunkSize": 1024
-    },
-    {
-        "inputFile": "lakossagi-aszf-3a-melleklet-dijak-mobil-havidijas-ertekesitheto-20260701-uj.pdf",
-        "skipPages": [1, 2],
-        "footerLinesPatterns": [
-            "^\\d+/\\d+$",
-            "^Utolsó módosítás:",
-            "^Hatálya:",
-            "^File neve:"
-        ],
-        "chunkSize": 1024
-    },
-    {
-        "inputFile": "lakossagi-aszf-3a-melleklet-dijak-mobil-havidijas-lezart-20260701-uj.pdf",
-        "skipPages": [1, 2],
-        "footerLinesPatterns": [
-            "^\\d+/\\d+$",
-            "^Utolsó módosítás:",
-            "^Hatálya:",
-            "^File neve:"
-        ],
-        "chunkSize": 1024
-    },
-    {
-        "inputFile": "lakossagi-aszf-3b-melleklet-dijak-vezetekes-telefon-ertekesitheto-20260312-uj.pdf",
-        "skipPages": [1, 2],
-        "footerLinesPatterns": [
-            "^\\d+/\\d+$",
-            "^Utolsó módosítás:",
-            "^Hatálya:",
-            "^File neve:"
-        ],
-        "chunkSize": 1024
-    },
-    {
-        "inputFile": "lakossagi-aszf-3b-melleklet-dijak-vezetekes-telefon-lezart-20260701-uj.pdf",
-        "skipPages": [1, 2, 3],
-        "footerLinesPatterns": [
-            "^\\d+/\\d+$",
-            "^Utolsó módosítás:",
-            "^Hatálya:",
-            "^File neve:"
-        ],
-        "chunkSize": 1024
-    },
-    {
-        "inputFile": "lakossagi-aszf-3c-melleklet-dijak-vezetekes-internet-ertekesitheto-20260312-uj.pdf",
-        "skipPages": [1, 2],
-        "footerLinesPatterns": [
-            "^\\d+/\\d+$",
-            "^Utolsó módosítás:",
-            "^Hatálya:",
-            "^File neve:"
-        ],
-        "chunkSize": 1024
-    },
-    {
-        "inputFile": "lakossagi-aszf-3c-melleklet-dijak-vezetekes-internet-lezart-20260701-uj.pdf",
-        "skipPages": [1, 2],
-        "footerLinesPatterns": [
-            "^\\d+/\\d+$",
-            "^Utolsó módosítás:",
-            "^Hatálya:",
-            "^File neve:"
-        ],
-        "chunkSize": 1024
-    },
-    {
-        "inputFile": "lakossagi-aszf-3d-melleklet-dijak-tv-ertekesitheto-20260401-uj.pdf",
-        "skipPages": [1, 2],
-        "footerLinesPatterns": [
-            "^\\d+/\\d+$",
-            "^Utolsó módosítás:",
-            "^Hatálya:",
-            "^File neve:"
-        ],
-        "chunkSize": 1024
-    },
-    {
-        "inputFile": "lakossagi-aszf-3d-melleklet-dijak-tv-lezart-20260701-uj.pdf",
-        "skipPages": [1, 2],
-        "footerLinesPatterns": [
-            "^\\d+/\\d+$",
-            "^Utolsó módosítás:",
-            "^Hatálya:",
-            "^File neve:"
-        ],
-        "chunkSize": 1024
-    }
-]
+{
+    "footerLinesPatterns": [
+        "^\\d+/\\d+$",
+        "^Utolsó módosítás:",
+        "^Hatálya:",
+        "^File neve:"
+    ],
+    "chunkSize": 512,
+    "documents": [
+        {
+            "inputFile": "lakossagi-aszf-0-torzsresz-20260701-uj.pdf",
+            "skipPages": [
+                1,
+                2,
+                3,
+                4
+            ]
+        },
+        {
+            "inputFile": "lakossagi-aszf-3a-melleklet-dijak-mobil-Domino-ertekesitheto-20260701-uj.pdf",
+            "skipPages": [
+                1,
+                2
+            ]
+        },
+        {
+            "inputFile": "lakossagi-aszf-3a-melleklet-dijak-mobil-Domino-lezart-20251101-uj.pdf",
+            "skipPages": [
+                1,
+                2
+            ]
+        },
+        {
+            "inputFile": "lakossagi-aszf-3a-melleklet-dijak-mobil-havidijas-ertekesitheto-20260701-uj.pdf",
+            "skipPages": [
+                1,
+                2
+            ]
+        },
+        {
+            "inputFile": "lakossagi-aszf-3a-melleklet-dijak-mobil-havidijas-lezart-20260701-uj.pdf",
+            "skipPages": [
+                1,
+                2
+            ]
+        },
+        {
+            "inputFile": "lakossagi-aszf-3b-melleklet-dijak-vezetekes-telefon-ertekesitheto-20260312-uj.pdf",
+            "skipPages": [
+                1,
+                2
+            ]
+        },
+        {
+            "inputFile": "lakossagi-aszf-3b-melleklet-dijak-vezetekes-telefon-lezart-20260701-uj.pdf",
+            "skipPages": [
+                1,
+                2,
+                3
+            ]
+        },
+        {
+            "inputFile": "lakossagi-aszf-3c-melleklet-dijak-vezetekes-internet-ertekesitheto-20260312-uj.pdf",
+            "skipPages": [
+                1,
+                2
+            ]
+        },
+        {
+            "inputFile": "lakossagi-aszf-3c-melleklet-dijak-vezetekes-internet-lezart-20260701-uj.pdf",
+            "skipPages": [
+                1,
+                2
+            ]
+        },
+        {
+            "inputFile": "lakossagi-aszf-3d-melleklet-dijak-tv-ertekesitheto-20260401-uj.pdf",
+            "skipPages": [
+                1,
+                2
+            ]
+        },
+        {
+            "inputFile": "lakossagi-aszf-3d-melleklet-dijak-tv-lezart-20260701-uj.pdf",
+            "skipPages": [
+                1,
+                2
+            ]
+        }
+    ]
+}

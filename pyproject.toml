@@ -8,6 +8,7 @@ dependencies = [
     "langchain-core>=0.3",
     "langchain-huggingface>=0.1",
     "sentence-transformers>=3",
+    "transformers>=4",
 ]
 
 [project.scripts]
