@@ -13,10 +13,10 @@ A pipeline négy fő lépésből áll, amit a `mini_rag.main` CLI orchestrál:
 corpus.json manifest
         │
         ▼
- pdf_parser.parse()       — PDF → egy darab plain-text (táblázat-tudatos)
+ pdf_parser.parse()       — PDF → plain-text
         │
         ▼
- SectionAwareTextSplitter — plain-text → retrieval-méretű chunk-ok
+ SectionAwareTextSplitter — plain-text → chunk-ok
         │
         ▼
  ChunkVectorStore         — chunk-ok → lokális embedding + in-memory vektortár
