@@ -27,9 +27,7 @@ corpus.json manifest
 
 Minden futtatás a `corpus.json`-ban felsorolt teljes dokumentumhalmazt
 újra feldolgozza és beágyazza; nincs perzisztens adatbázis vagy inkrementális
-frissítés — ez a "frissüljön a DB" követelményt a legegyszerűbb módon
-teljesíti, cserébe minden indítás néhány perces PDF-feldolgozási és
-embedding-számítási költséggel jár (lásd az "Trade-off-ok" szakaszt).
+frissítés.
 
 ## Modulok
 
@@ -38,7 +36,7 @@ embedding-számítási költséggel jár (lásd az "Trade-off-ok" szakaszt).
 - Beolvassa a `corpus.json` manifestet, minden dokumentumra lefuttatja a
   parse+chunk lépéseket (`run()` függvény), majd az összes chunkot egyetlen
   `ChunkVectorStore`-ba tölti.
-- Ezután egy `while True` ciklusban stdin-ről olvas kérdéseket, amíg a
+- Ezután egy ciklusban stdin-ről olvas kérdéseket, amíg a
   felhasználó `exit`-et nem ír be vagy EOF nem érkezik.
 - Kérdésenként vagy `chunk_store.search()` (top-k), vagy
   `chunk_store.search_all()` (min-similarity szűrés) hívódik meg, az alapján,
@@ -56,7 +54,7 @@ oszlopokat, ezért a modul oldalanként két külön utat követ, majd egyesíti
 1. **Táblázatok**: `page.find_tables()` + `.extract()`, majd
    `"cella | cella | ..."` formátumú sorokká szerializálva
    (`_serialize_table`), hogy a sor/oszlop struktúra megmaradjon.
-2. **Prózai szöveg**: a táblázatok bounding box-ait kivágva
+2. **Szöveg**: a táblázatok bounding box-ait kivágva
    (`page.outside_bbox`) a maradék szöveg soronként kerül kiszedésre, hogy a
    táblázat-tartalom ne duplikálódjon.
 3. A két forrásból származó szegmensek a `top` (Y-koordináta) szerint vannak
@@ -77,7 +75,7 @@ A `SectionAwareTextSplitter` két menetben darabol:
    következő azonos szintű testvér-szakasszal összevonásra kerülnek, hogy ne
    maradjanak önálló, alig informatív mini-chunk-ok; a `_MIN_SECTION_TOKENS`
    fölötti szakaszok önálló egységként maradnak.
-2. **Test-darabolás** (`CharacterTextSplitter`): csak azok a
+2. **Szakasz szöveg-darabolás** (`CharacterTextSplitter`): csak azok a
    szakasz-egységek kerülnek ide, amelyek a valódi `chunk_size`-nál
    nagyobbak. Egyetlen, lapos szeparátor-szintet használ (nincs
    rekurzió), így a `chunk_overlap` konzisztensen érvényesül minden
@@ -87,20 +85,12 @@ A `SectionAwareTextSplitter` két menetben darabol:
 A `chunk_size` és a `_MIN_SECTION_TOKENS` az
 embedding modell (`intfloat/multilingual-e5-base`) saját tokenizálójával
 mért **token**-ekben van megadva, nem karakterben, mert az E5 modellek egy
-fix (512 token-es) input-korlátnál csonkolnak. Karakter alapú méretezés
-csendben engedhetne át 512 tokennél hosszabb vagy token-sűrűbb szöveget,
-amit az embedding modell észrevétlenül levágna.
-
-A `_MIN_SECTION_TOKENS = 96` értéket a korpusz saját token-hossz eloszlásából
-választottuk: kényelmesen a "cím vagy egy rövid mondat" (~50 token) sáv
-fölött, jóval a ~170 token-es medián szakaszméret alatt, hogy csak a
-ténylegesen apró szakaszok kerüljenek összevonásra.
+fix (512 token-es) input-korlátnál határoltak.
 
 ### `mini_rag/embedder.py` — beágyazás + vektortár
 
 - **Modell**: `intfloat/multilingual-e5-base` (`sentence-transformers`
-  révén, `langchain-huggingface`-en keresztül), teljesen lokálisan fut, nincs
-  külső API-hívás vagy API kulcs.
+  révén, `langchain-huggingface`-en keresztül), teljesen lokálisan fut.
 - **`E5Embeddings`**: az E5 modellcsalád aszimmetrikus tanítást használ —
   kérdéseket `"query: "`, dokumentum-chunk-okat `"passage: "` prefixszel kell
   ellátni ahhoz, hogy a modell meg tudja különböztetni a két szerepet. Ezt a
@@ -108,30 +98,7 @@ ténylegesen apró szakaszok kerüljenek összevonásra.
 - **`ChunkVectorStore`**: egy LangChain `InMemoryVectorStore`-t csomagol be.
   Két keresési mód érhető el:
   - `search(query, k)`: a `k` legközelebbi chunk (top-k).
-  - `search_all(query, min_similarity)`: **ez implementálja a feladat azon
-    követelményét, hogy egy cosine metrikát támogató kollekció esetén
-    minden találatot vissza lehessen adni, nem csak a top X-et** — az
-    `InMemoryVectorStore` mindig koszinusz hasonlóság szerint rangsorol,
-    ezért minden tárolt chunk pontszámát kiszámítva és a küszöbérték szerint
-    szűrve megkapható minden releváns találat, korlátozás nélkül.
-
-
-## Adatfolyam / architektúra diagram
-
-```mermaid
-flowchart TD
-    A[corpus.json manifest] --> B[pdf_parser.parse]
-    B -->|plain text oldalanként interleave-elve| C[SectionAwareTextSplitter]
-    C -->|chunk lista| D[ChunkVectorStore.add_documents]
-    D -->|E5Embeddings lokális embedding| E[InMemoryVectorStore]
-    F[stdin kérdés] --> G{--min-similarity?}
-    G -->|igen| H[search_all: minden cosine >= threshold találat]
-    G -->|nem| I[search: top-k legközelebbi]
-    E --> H
-    E --> I
-    H --> J[konzolra írt találatok]
-    I --> J
-```
+  - `search_all(query, min_similarity)`: — cosine hasonlósági küszöbérték feletti összes chunk
 
 ## Ismert korlátok / jövőbeli fejlesztési lehetőségek
 
@@ -139,5 +106,5 @@ flowchart TD
   teljes korpuszt.
 - **Egyetlen embedding modell**: nincs lehetőség modellváltásra CLI
   paraméterrel.
-- **Nincs re-ranking vagy hybrid (BM25 + vektor) keresés**: a keresés
+- **Nincs re-ranking vagy hybrid keresés**: a keresés
   kizárólag cosine hasonlóságon alapul.

@@ -12,12 +12,6 @@ from mini_rag.embedder import DEFAULT_MODEL_NAME
 _CHUNK_OVERLAP_RATIO: Final[float] = 0.2
 _BODY_SEPARATOR: Final[str] = " "
 
-# Sections at or below this many tokens (e.g. a bare heading like "1.9.
-# Szerkesztési célra fenntartva.") are merged with following same-level
-# sibling sections instead of staying their own near-empty chunk. Chosen
-# from the corpus's own token-length distribution: comfortably above the
-# ~50-token "title or one short sentence" band, well below the ~170-token
-# median section, so only genuinely tiny sections get merged.
 _MIN_SECTION_TOKENS: Final[int] = 96
 
 _SECTION_HEADING_PATTERNS: Final[list[str]] = [

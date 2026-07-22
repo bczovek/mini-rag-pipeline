@@ -5,7 +5,7 @@
         "^Hatálya:",
         "^File neve:"
     ],
-    "chunkSize": 512,
+    "chunkSize": 256,
     "documents": [
         {
             "inputFile": "lakossagi-aszf-0-torzsresz-20260701-uj.pdf",

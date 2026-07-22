@@ -9,8 +9,8 @@ from mini_rag.embedder import ChunkVectorStore
 from mini_rag.pdf_parser import parse
 from mini_rag.text_splitter import SectionAwareTextSplitter
 
-DEFAULT_CHUNK_SIZE: Final[int] = 512
-DEFAULT_SEARCH_RESULTS: Final[int] = 4
+DEFAULT_CHUNK_SIZE: Final[int] = 256
+DEFAULT_SEARCH_RESULTS: Final[int] = 8
 
 _logger: logging.Logger = logging.getLogger(__name__)
 
