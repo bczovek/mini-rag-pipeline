@@ -36,6 +36,7 @@ A pipeline-t a `run.sh` szkripttel kell indítani, amely:
 
 ```bash
 cd mini-rag
+chmod +x run.sh
 ./run.sh corpus/corpus.json
 ```
 
