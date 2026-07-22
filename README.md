@@ -15,7 +15,7 @@ feldolgozni, és hogyan:
 - `footerLinesPatterns`: reguláris kifejezések listája, amelyekkel az egyes
   oldalak alján ismétlődő lábléc-sorok (pl. oldalszám, "Utolsó módosítás:")
   eltávolíthatók a szövegből.
-- `chunkSize`: egy chunkba eső maximum tokenek száma (alapértelmezett: 512).
+- `chunkSize`: egy chunkba eső maximum tokenek száma (alapértelmezett: 256).
 - `documents`: a feldolgozandó dokumentumok listája, soronként:
   - `inputFile`: a PDF fájl neve (a manifesttel azonos könyvtárban keresi).
   - `skipPages`: kihagyandó oldalszámok listája (pl. tartalomjegyzék).
@@ -75,11 +75,6 @@ Példák:
 - A vektortár csak memóriában létezik: a program leállítása után a beágyazott
   adatok elvesznek, a következő futtatáskor a `corpus.json`-ban felsorolt
   dokumentumok újra feldolgozásra és beágyazásra kerülnek.
-- A beágyazás ~6 percet vesz igénybe.
+- A beágyazás ~5-6 percet vesz igénybe. (Intel Core Ultra 7 265H (2.20 GHz), 32 GB RAM)
 
-## További dokumentáció
-
-Az implementáció belső felépítéséért (modulok, tervezési döntések,
-trade-off-ok, architektúra diagram) lásd a [DEVELOPERS.md](DEVELOPERS.md)
-fejlesztői dokumentációt.
 
